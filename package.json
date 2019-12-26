@@ -1,0 +1,23 @@
+{
+  "name": "isometric-demo",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "author": "Andrew Huynh <a5thuynh@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "three": "^0.111.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.103.2",
+    "awesome-typescript-loader": "^5.2.1",
+    "typescript": "^3.7.4",
+    "webpack": "^4.41.4",
+    "webpack-cli": "^3.3.10",
+    "webpack-dev-server": "^3.10.1"
+  },
+  "scripts": {
+    "dev": "./node_modules/.bin/webpack-dev-server",
+    "build": "./node_modules/.bin/webpack"
+  }
+}
