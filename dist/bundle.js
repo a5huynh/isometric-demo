@@ -50304,6 +50304,33 @@ if ( typeof __THREE_DEVTOOLS__ !== 'undefined' ) {
 
 /***/ }),
 
+/***/ "./src/constants.ts":
+/*!**************************!*\
+  !*** ./src/constants.ts ***!
+  \**************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var Direction;
+(function (Direction) {
+    Direction[Direction["NORTH"] = 0] = "NORTH";
+    Direction[Direction["EAST"] = 1] = "EAST";
+    Direction[Direction["SOUTH"] = 2] = "SOUTH";
+    Direction[Direction["WEST"] = 3] = "WEST";
+})(Direction = exports.Direction || (exports.Direction = {}));
+;
+exports.GRID_WIDTH = 5;
+exports.GRID_HEIGHT = 5;
+exports.TILE_WIDTH = 32;
+// NOTE: Tile height is the height of image minus any overlap
+exports.TILE_HEIGHT = 24;
+
+
+/***/ }),
+
 /***/ "./src/index.ts":
 /*!**********************!*\
   !*** ./src/index.ts ***!
@@ -50320,16 +50347,32 @@ var __importStar = (this && this.__importStar) || function (mod) {
     result["default"] = mod;
     return result;
 };
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", { value: true });
 const THREE = __importStar(__webpack_require__(/*! three */ "./node_modules/three/build/three.module.js"));
+const constants_1 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+const math_1 = __webpack_require__(/*! ./math */ "./src/math.ts");
 const tiles_1 = __webpack_require__(/*! ./tiles */ "./src/tiles.ts");
 const grid_1 = __webpack_require__(/*! ./scene/grid */ "./src/scene/grid.ts");
 const SPRITE_MAP = tiles_1.init_tiles();
+let RENDER_OPTIONS = {
+    angle: 0,
+    direction: constants_1.Direction.NORTH,
+    sprite: true,
+    transform: {
+        center: true,
+        rotation: true,
+        isometric: true,
+        scale: true
+    }
+};
 // The 10 x 10 grid we're using in the example
 let grid = [
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    // Adding a dirt patch in the corner so we can visualize the
+    // rotation.
+    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -50353,14 +50396,11 @@ function onWindowResize() {
 let camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, 0.1, 1000);
 let scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
-let scale = new THREE.Vector3(16, 16, 16);
-let container = grid_1.init_scene(SPRITE_MAP, grid);
-container.scale.x = 16;
-container.scale.y = 16;
+let container = grid_1.init_scene(SPRITE_MAP, grid, RENDER_OPTIONS);
 scene.add(container);
 // NOTE: WebGL uses right handed coordinate system, positive z values go towards
 // the viewer.
-camera.position.z = 5;
+camera.position.z = 20;
 let renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(width, height);
 renderer.setPixelRatio(window.devicePixelRatio);
@@ -50371,6 +50411,121 @@ function animate() {
 }
 window.addEventListener('resize', onWindowResize, false);
 animate();
+// Setup button events
+(_a = document.getElementById('rotate_left')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', () => {
+    // Rotate the tiles counter-clockwise
+    const [new_dir, angle] = math_1.rotate_left(RENDER_OPTIONS.direction);
+    RENDER_OPTIONS.angle = angle;
+    RENDER_OPTIONS.direction = new_dir;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+});
+(_b = document.getElementById('rotate_right')) === null || _b === void 0 ? void 0 : _b.addEventListener('click', () => {
+    // Rotate the tiles counter-clockwise
+    const [new_dir, angle] = math_1.rotate_right(RENDER_OPTIONS.direction);
+    RENDER_OPTIONS.angle = angle;
+    RENDER_OPTIONS.direction = new_dir;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+});
+(_c = document.getElementById('toggle_sprite')) === null || _c === void 0 ? void 0 : _c.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.sprite = !RENDER_OPTIONS.sprite;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    evt.currentTarget.innerHTML = `sprite: ${RENDER_OPTIONS.sprite}`;
+});
+(_d = document.getElementById('toggle_center')) === null || _d === void 0 ? void 0 : _d.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.center = !RENDER_OPTIONS.transform.center;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    evt.currentTarget.innerHTML = `center: ${RENDER_OPTIONS.transform.center}`;
+});
+(_e = document.getElementById('toggle_rot')) === null || _e === void 0 ? void 0 : _e.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.rotation = !RENDER_OPTIONS.transform.rotation;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    evt.currentTarget.innerHTML = `rotation: ${RENDER_OPTIONS.transform.rotation}`;
+});
+(_f = document.getElementById('toggle_iso')) === null || _f === void 0 ? void 0 : _f.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.isometric = !RENDER_OPTIONS.transform.isometric;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    evt.currentTarget.innerHTML = `isometric: ${RENDER_OPTIONS.transform.isometric}`;
+});
+(_g = document.getElementById('toggle_scale')) === null || _g === void 0 ? void 0 : _g.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.scale = !RENDER_OPTIONS.transform.scale;
+    grid_1.update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    evt.currentTarget.innerHTML = `scale: ${RENDER_OPTIONS.transform.scale}`;
+});
+
+
+/***/ }),
+
+/***/ "./src/math.ts":
+/*!*********************!*\
+  !*** ./src/math.ts ***!
+  \*********************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const constants_1 = __webpack_require__(/*! ./constants */ "./src/constants.ts");
+function apply_transforms(x, y, rot, opts) {
+    // Center grid on the origin
+    let cx = x;
+    let cy = y;
+    if (opts.center) {
+        cx -= constants_1.GRID_WIDTH;
+        cy -= constants_1.GRID_HEIGHT;
+    }
+    // Rotate around new origin
+    let cos_rot = Math.cos(rot);
+    let sin_rot = Math.sin(rot);
+    let rx = cx;
+    let ry = cy;
+    if (opts.rotation) {
+        rx = (cx * cos_rot) - (cy * sin_rot);
+        ry = (cx * sin_rot) + (cy * cos_rot);
+    }
+    // Scale and rotate one last time to get into iso view.
+    // NOTE: Since a rotation of 45 degrees makes it so sin = cos = 0.707, I
+    // factor out the value since all it's doing is scaling the grid down.
+    let px = rx;
+    let py = ry;
+    let pz = -(rx + ry);
+    if (opts.isometric) {
+        px = (rx - ry) / 2;
+        py = (rx + ry) / 2;
+    }
+    if (opts.scale) {
+        px *= constants_1.TILE_WIDTH;
+        py *= constants_1.TILE_HEIGHT;
+    }
+    return [px, py, pz];
+}
+exports.apply_transforms = apply_transforms;
+function rotate_left(dir) {
+    if (dir == constants_1.Direction.NORTH) {
+        return [constants_1.Direction.EAST, Math.PI / 2];
+    }
+    else if (dir == constants_1.Direction.EAST) {
+        return [constants_1.Direction.SOUTH, Math.PI];
+    }
+    else if (dir == constants_1.Direction.SOUTH) {
+        return [constants_1.Direction.WEST, -Math.PI / 2];
+    }
+    return [constants_1.Direction.NORTH, 0];
+}
+exports.rotate_left = rotate_left;
+function rotate_right(dir) {
+    if (dir == constants_1.Direction.NORTH) {
+        return [constants_1.Direction.WEST, -Math.PI / 2];
+    }
+    else if (dir == constants_1.Direction.WEST) {
+        return [constants_1.Direction.SOUTH, Math.PI];
+    }
+    else if (dir == constants_1.Direction.SOUTH) {
+        return [constants_1.Direction.EAST, Math.PI / 2];
+    }
+    return [constants_1.Direction.NORTH, 0];
+}
+exports.rotate_right = rotate_right;
 
 
 /***/ }),
@@ -50393,20 +50548,46 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const THREE = __importStar(__webpack_require__(/*! three */ "./node_modules/three/build/three.module.js"));
-function init_scene(map, grid) {
+const math_1 = __webpack_require__(/*! ../math */ "./src/math.ts");
+let EVEN_TEXTURE = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+let ODD_TEXTURE = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+function init_scene(map, grid, opts) {
     let container = new THREE.Object3D();
-    let geometry = new THREE.PlaneGeometry(1, 1);
+    let geometry = new THREE.PlaneGeometry(32, 32);
     for (let y = 0; y < grid.length; y++) {
         for (let x = 0; x < grid[y].length; x++) {
             let tile = new THREE.Mesh(geometry, map[grid[y][x]]);
-            tile.position.y = y;
-            tile.position.x = x;
+            let [px, py, pz] = math_1.apply_transforms(x, y, opts.angle, opts.transform);
+            // Save the original x/y so we can rotate this later on.
+            tile.userData = { x, y, sprite: grid[y][x] };
+            tile.position.x = px;
+            tile.position.y = py;
+            tile.position.z = pz;
             container.add(tile);
         }
     }
+    // Center grid
+    container.position.x -= 5;
+    container.position.y -= 5;
     return container;
 }
 exports.init_scene = init_scene;
+function update_scene(scene, map, opts) {
+    scene.children.forEach((child) => {
+        const { x, y, sprite } = child.userData;
+        const [px, py, pz] = math_1.apply_transforms(x, y, opts.angle, opts.transform);
+        child.position.x = px;
+        child.position.y = py;
+        child.position.z = pz;
+        if (opts.sprite) {
+            child.material = map[sprite];
+        }
+        else {
+            child.material = (x + y) % 2 ? EVEN_TEXTURE : ODD_TEXTURE;
+        }
+    });
+}
+exports.update_scene = update_scene;
 
 
 /***/ }),
@@ -50437,18 +50618,17 @@ var Tile;
 ;
 const SPRITE_MAP = {
     [Tile.GRASS]: 'grass.png',
-    [Tile.WATER]: 'water.png'
+    [Tile.WATER]: 'dirtDouble.png'
 };
 function init_tiles() {
     let textures = {};
     for (let key in SPRITE_MAP) {
         let path = SPRITE_MAP[key];
-        let texture = new THREE.TextureLoader().load(`tiles/${path}`, function onLoad() {
-            console.log('loaded');
-        }, undefined, function onError(event) {
-            console.log(event);
+        let texture = new THREE.TextureLoader().load(`tiles/${path}`);
+        textures[key] = new THREE.MeshBasicMaterial({
+            map: texture,
+            transparent: true
         });
-        textures[key] = new THREE.MeshBasicMaterial({ map: texture });
     }
     return textures;
 }

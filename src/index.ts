@@ -2,11 +2,21 @@ import * as THREE from 'three';
 import { Direction } from './constants';
 import { apply_transforms, rotate_left, rotate_right } from './math';
 import { init_tiles } from './tiles';
-import { init_scene } from './scene/grid';
+import { init_scene, RenderOptions, update_scene } from './scene/grid';
 
 const SPRITE_MAP: Record<number, THREE.MeshBasicMaterial> = init_tiles();
 
-let CURRENT_DIR: Direction = Direction.NORTH;
+let RENDER_OPTIONS: RenderOptions = {
+    angle: 0,
+    direction: Direction.NORTH,
+    sprite: true,
+    transform: {
+        center: true,
+        rotation: true,
+        isometric: true,
+        scale: true
+    }
+};
 
 // The 10 x 10 grid we're using in the example
 let grid: Array<Array<number>> = [
@@ -52,7 +62,7 @@ let camera = new THREE.OrthographicCamera(
 let scene = new THREE.Scene();
 scene.background = new THREE.Color( 0x000000 );
 
-let container = init_scene(SPRITE_MAP, grid);
+let container = init_scene(SPRITE_MAP, grid, RENDER_OPTIONS);
 scene.add(container);
 
 // NOTE: WebGL uses right handed coordinate system, positive z values go towards
@@ -73,32 +83,48 @@ window.addEventListener( 'resize', onWindowResize, false );
 animate();
 
 // Setup button events
-let rl_btn = document.getElementById('rotate_left');
-rl_btn?.addEventListener('click', () => {
+document.getElementById('rotate_left')?.addEventListener('click', () => {
     // Rotate the tiles counter-clockwise
-    const [new_dir, angle] = rotate_left(CURRENT_DIR);
-    CURRENT_DIR = new_dir;
-
-    container.children.forEach((child) => {
-        const { x, y } = child.userData;
-        const [px, py, pz] = apply_transforms(x, y, angle);
-        child.position.x = px;
-        child.position.y = py;
-        child.position.z = pz;
-    })
+    const [new_dir, angle] = rotate_left(RENDER_OPTIONS.direction);
+    RENDER_OPTIONS.angle = angle;
+    RENDER_OPTIONS.direction = new_dir;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
 });
 
-let rr_btn = document.getElementById('rotate_right');
-rr_btn?.addEventListener('click', () => {
+document.getElementById('rotate_right')?.addEventListener('click', () => {
     // Rotate the tiles counter-clockwise
-    const [new_dir, angle] = rotate_right(CURRENT_DIR);
-    CURRENT_DIR = new_dir;
+    const [new_dir, angle] = rotate_right(RENDER_OPTIONS.direction);
+    RENDER_OPTIONS.angle = angle;
+    RENDER_OPTIONS.direction = new_dir;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+});
 
-    container.children.forEach((child) => {
-        const { x, y } = child.userData;
-        const [px, py, pz] = apply_transforms(x, y, angle);
-        child.position.x = px;
-        child.position.y = py;
-        child.position.z = pz;
-    })
+document.getElementById('toggle_sprite')?.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.sprite = !RENDER_OPTIONS.sprite;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    (<HTMLElement>evt.currentTarget).innerHTML = `sprite: ${RENDER_OPTIONS.sprite}`;
+});
+
+document.getElementById('toggle_center')?.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.center = !RENDER_OPTIONS.transform.center;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    (<HTMLElement>evt.currentTarget).innerHTML = `center: ${RENDER_OPTIONS.transform.center}`;
+});
+
+document.getElementById('toggle_rot')?.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.rotation = !RENDER_OPTIONS.transform.rotation;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    (<HTMLElement>evt.currentTarget).innerHTML = `rotation: ${RENDER_OPTIONS.transform.rotation}`;
+});
+
+document.getElementById('toggle_iso')?.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.isometric = !RENDER_OPTIONS.transform.isometric;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    (<HTMLElement>evt.currentTarget).innerHTML = `isometric: ${RENDER_OPTIONS.transform.isometric}`;
+});
+
+document.getElementById('toggle_scale')?.addEventListener('click', (evt) => {
+    RENDER_OPTIONS.transform.scale = !RENDER_OPTIONS.transform.scale;
+    update_scene(container, SPRITE_MAP, RENDER_OPTIONS);
+    (<HTMLElement>evt.currentTarget).innerHTML = `scale: ${RENDER_OPTIONS.transform.scale}`;
 });
