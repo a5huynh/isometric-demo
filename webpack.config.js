@@ -1,11 +1,10 @@
 const path = require('path');
-const { CheckerPlugin } = require('awesome-typescript-loader');
 
 module.exports = {
   entry: './src/index.ts',
   devtool: 'source-map',
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    static: path.join(__dirname, 'dist'),
     compress: true,
     port: 9000
   },
@@ -14,7 +13,7 @@ module.exports = {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'awesome-typescript-loader',
+        use: 'ts-loader',
         exclude: /node_modules/,
       },
     ],
@@ -26,7 +25,4 @@ module.exports = {
     filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist'),
   },
-  plugins: [
-    new CheckerPlugin()
-  ]
 };
